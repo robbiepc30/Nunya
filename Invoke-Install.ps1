@@ -26,7 +26,7 @@ function Invoke-Install
     foreach ($i in $installerScripts) {
         
         $installerName = (Split-Path -Path $i.FullName -Leaf) -replace ".Install.ps1", ""
-        Write-Progress -Activity "Installing updates" -Status ("{0:P1}" -f $($installerScripts.IndexOf($i)/$installerScripts.Length)) -CurrentOperation "Installing $installerName"  -PercentComplete (($installerScripts.IndexOf($i)/$installerScripts.Length) * 100)
+        Write-Progress -Activity "Installing updates" -Status ("$($installerScripts.IndexOf($i))`/$($installerScripts.Length), {0:P1}" -f $($installerScripts.IndexOf($i)/$installerScripts.Length)) -CurrentOperation "Installing $installerName"  -PercentComplete (($installerScripts.IndexOf($i)/$installerScripts.Length) * 100)
         Write-Verbose "Installing $installerName"
         & $i.FullName
         if ($otherErrorCodes.ContainsKey($LASTEXITCODE)) {
