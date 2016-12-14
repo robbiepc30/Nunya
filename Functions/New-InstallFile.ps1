@@ -18,7 +18,7 @@ function New-InstallFile
 
         # Param2 help description
         [ValidateSet("msu", "msi", "exe")]
-        [String[]]$Type
+        [String[]]$installerType
     )
 
     Process
@@ -44,22 +44,28 @@ function createInstallerFile ($File, $Code)
 
 function generateInstallerCode ($File) {
     $FullName = $File.FullName
-    $type = $FullName.Split('.')[-1]
+    $installerType = $FullName.Split('.')[-1]
     $installerFileName = Split-Path -Path $FullName -Leaf
-    switch ($type) {
+    switch ($installerType) {
     'msi' { 
             '# Invoke Installer
             $process = Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$PSScriptRoot\#MSUFile#`" /quiet /norestart" -Wait -PassThru
             Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
           }
     'exe' { 
-            $isAdobe = $File.VersionInfo.ProductName -like '*adobe*'
-            switch ($isAdobe) {
-                $true { 
+            $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
+                           elseif ($File.VersionInfo.ProductName -like '*java*') {"Java"}
+            switch ($productType) {
+                "Adobe" { 
                         '# Invoke Installer
                         $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/sAll /rs" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
-                     }
+                       }
+               "Java" { 
+                        '# Invoke Installer
+                        $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
+                        Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+                       }
                 Default {   
                             '# Invoke Installer
                              $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
