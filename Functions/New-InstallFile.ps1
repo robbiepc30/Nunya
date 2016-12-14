@@ -18,12 +18,13 @@ function New-InstallFile
 
         # Param2 help description
         [ValidateSet("msu", "msi", "exe")]
-        [String[]]$installerType
+        [String[]]$Type = @("msu", "msi", "exe")
     )
 
     Process
     {
-        $fileList = Get-ChildItem -Path $Path -Include *.msu,*.msi, *.exe -Recurse
+        $includeTypes = $Type |  ForEach-Object {"*.$_"}
+        $fileList = Get-ChildItem -Path $Path -Include $includeTypes -Recurse
         
         foreach ($f in $fileList) {
                 $code = generateInstallerCode -File $f
@@ -65,11 +66,11 @@ function generateInstallerCode ($File) {
                         '# Invoke Installer
                         $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
-                       }
+                      }
                 Default {   
-                            '# Invoke Installer
-                             $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
-                            Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
+                         '# Invoke Installer
+                          $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
+                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
                         } 
           }
     'msu' { 
