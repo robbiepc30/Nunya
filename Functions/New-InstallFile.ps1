@@ -24,27 +24,29 @@ function New-InstallFile
     Process
     {
         $msuInstallSyntax = 'Start-Process  WUSA -ArgumentList "#MSUFile# /quiet /norestart" -Wait -PassThru' -replace "#MSUFile#", $installerFileName
-        $fileNameList = Get-ChildItem -Path $Path -Include *.msu,*.msi, *.exe -Recurse | select -ExpandProperty FullName
+        $fileList = Get-ChildItem -Path $Path -Include *.msu,*.msi, *.exe -Recurse
         
-        foreach ($f in $fileNameList) {
-                
-                $installerFileName = Split-Path -Path $f -Leaf
-                $ps1InstallFileName = $f + ".Install.ps1"
-
-                $code = generateInstallerCode -InstallerFileName $installerFileName
-                createFile -Name $ps1InstallFileName -Content $code
+        foreach ($f in $fileList) {
+                $code = generateInstallerCode -File $f
+                createInstallerFile -File $f -Code $code
         }
     }
 }
 
-function createFile ($Name, $Content)
+function createInstallerFile ($File, $Code)
 {
-    Write-Verbose "Creating $Name File"
-    Set-Content -Path $Name -Value $Content -Encoding UTF8
+    $FullName = $File.FullName
+    $installerFileName = Split-Path -Path $FullName -Leaf
+    $ps1InstallFileName = $FullName + ".Install.ps1"
+    Write-Verbose "Creating $ps1InstallFileName File"
+    Set-Content -Path $ps1InstallFileName -Value $Code -Encoding UTF8
+    
 }
 
-function generateInstallerCode ($InstallerFileName) {
-    $type = $installerFileName.Split('.')[-1]
+function generateInstallerCode ($File) {
+    $FullName = $File.FullName
+    $type = $FullName.Split('.')[-1]
+    $installerFileName = Split-Path -Path $FullName -Leaf
     switch ($type) {
     'msi' { 
             '# Invoke Installer
@@ -52,9 +54,13 @@ function generateInstallerCode ($InstallerFileName) {
             Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
           }
     'exe' { 
-            '# Invoke Installer
-            $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
-            Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+            switch ($x) {
+                condition {  }
+                Default {
+                            '# Invoke Installer
+                             $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
+                            Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
+            } 
           }
     'msu' { 
             '# Invoke Installer
