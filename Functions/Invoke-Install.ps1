@@ -21,6 +21,7 @@ function Invoke-Install
 
     $otherErrorCodes = @{ -2145124329 = "This update is not applicable to your computer"
                           2359302 = "This update is already installed on this computer"
+                          17025 = "Patch already installed"
                         }
 
     foreach ($i in $installerScripts) {
