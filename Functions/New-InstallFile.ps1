@@ -1,22 +1,12 @@
-﻿<#
-.Synopsis
-   Short description
-.DESCRIPTION
-   Long description
-.EXAMPLE
-   Example of how to use this cmdlet
-.EXAMPLE
-   Another example of how to use this cmdlet
-#>
-function New-InstallFile
+﻿function New-InstallFile
 {
     [CmdletBinding()]
     Param
     (
-        # Param1 help description
+        # Path search and create installer files
         $Path = '.',
 
-        # Param2 help description
+        # Installer Types msu, msi, exe
         [ValidateSet("msu", "msi", "exe")]
         [String[]]$Type = @("msu", "msi", "exe")
     )
@@ -62,11 +52,11 @@ function generateInstallerCode ($File) {
                         $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/sAll /rs" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
                        }
-               "Java" { 
-                        '# Invoke Installer
-                        $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
-                        Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
-                      }
+               "Java"  { 
+                         '# Invoke Installer
+                         $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
+                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+                       }
                 Default {   
                          '# Invoke Installer
                           $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
