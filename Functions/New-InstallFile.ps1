@@ -24,7 +24,7 @@ function New-InstallFile
     Process
     {
         $msuInstallSyntax = 'Start-Process  WUSA -ArgumentList "#MSUFile# /quiet /norestart" -Wait -PassThru' -replace "#MSUFile#", $installerFileName
-        $fileNameList = Get-ChildItem -Path $Path -Include *.msu,*.msi -Recurse | select -ExpandProperty FullName
+        $fileNameList = Get-ChildItem -Path $Path -Include *.msu,*.msi, *.exe -Recurse | select -ExpandProperty FullName
         
         foreach ($f in $fileNameList) {
                 
