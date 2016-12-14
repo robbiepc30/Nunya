@@ -23,7 +23,6 @@ function New-InstallFile
 
     Process
     {
-        $msuInstallSyntax = 'Start-Process  WUSA -ArgumentList "#MSUFile# /quiet /norestart" -Wait -PassThru' -replace "#MSUFile#", $installerFileName
         $fileList = Get-ChildItem -Path $Path -Include *.msu,*.msi, *.exe -Recurse
         
         foreach ($f in $fileList) {
@@ -54,13 +53,18 @@ function generateInstallerCode ($File) {
             Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
           }
     'exe' { 
-            switch ($x) {
-                condition {  }
-                Default {
+            $isAdobe = $File.VersionInfo.ProductName -like '*adobe*'
+            switch ($isAdobe) {
+                $true { 
+                        '# Invoke Installer
+                        $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/sAll /rs" -Wait -PassThru
+                        Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+                     }
+                Default {   
                             '# Invoke Installer
                              $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
                             Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
-            } 
+                        } 
           }
     'msu' { 
             '# Invoke Installer
