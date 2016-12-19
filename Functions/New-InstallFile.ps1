@@ -53,19 +53,11 @@ function generateInstallerCode ($File)
                         $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/sAll /rs" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#File#", $installerFileName 
                        }
-<<<<<<< HEAD
-               "Java"  { 
-                         '# Invoke Installer
-                         $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
-                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
-                       }
-=======
                "Java" { 
                         '# Invoke Installer
                         $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/s" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#File#", $installerFileName 
                       }
->>>>>>> 4e23c0d4a92e9ce4c9cb9c77cad60b66753b7849
                 Default {   
                          '# Invoke Installer
                           $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/q /norestart" -Wait -PassThru
