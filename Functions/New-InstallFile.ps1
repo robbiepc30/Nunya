@@ -43,7 +43,8 @@ function createInstallerFile ($File, $Code)
     
 }
 
-function generateInstallerCode ($File) {
+function generateInstallerCode ($File) 
+{
     $FullName = $File.FullName
     $installerType = $FullName.Split('.')[-1]
     $installerFileName = Split-Path -Path $FullName -Leaf
