@@ -11,16 +11,14 @@
         [String[]]$Type = @("msu", "msi", "exe")
     )
 
-    Process
-    {
-        $includeTypes = $Type |  ForEach-Object {"*.$_"}
-        $fileList = Get-ChildItem -Path $Path -Include $includeTypes -Recurse
-        
-        foreach ($f in $fileList) {
-                $code = generateInstallerCode -File $f
-                createInstallerFile -File $f -Code $code
-        }
+    $includeTypes = $Type |  ForEach-Object {"*.$_"}
+    $fileList = Get-ChildItem -Path $Path -Include $includeTypes -Recurse
+    
+    foreach ($f in $fileList) {
+            $code = generateInstallerCode -File $f
+            createInstallerFile -File $f -Code $code
     }
+
 }
 
 function createInstallerFile ($File, $Code)
