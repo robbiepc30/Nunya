@@ -33,15 +33,16 @@ function createInstallerFile ($File, $Code)
     
 }
 
-function generateInstallerCode ($File) {
+function generateInstallerCode ($File) 
+{
     $FullName = $File.FullName
     $installerType = $FullName.Split('.')[-1]
     $installerFileName = Split-Path -Path $FullName -Leaf
     switch ($installerType) {
     'msi' { 
             '# Invoke Installer
-            $process = Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$PSScriptRoot\#MSUFile#`" /quiet /norestart" -Wait -PassThru
-            Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+            $process = Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$PSScriptRoot\#File#`" /quiet /norestart" -Wait -PassThru
+            Exit $process.ExitCode' -replace "#File#", $installerFileName 
           }
     'exe' { 
             $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
@@ -49,24 +50,32 @@ function generateInstallerCode ($File) {
             switch ($productType) {
                 "Adobe" { 
                         '# Invoke Installer
-                        $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/sAll /rs" -Wait -PassThru
-                        Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
+                        $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/sAll /rs" -Wait -PassThru
+                        Exit $process.ExitCode' -replace "#File#", $installerFileName 
                        }
+<<<<<<< HEAD
                "Java"  { 
                          '# Invoke Installer
                          $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/s" -Wait -PassThru
                          Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName 
                        }
+=======
+               "Java" { 
+                        '# Invoke Installer
+                        $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/s" -Wait -PassThru
+                        Exit $process.ExitCode' -replace "#File#", $installerFileName 
+                      }
+>>>>>>> 4e23c0d4a92e9ce4c9cb9c77cad60b66753b7849
                 Default {   
                          '# Invoke Installer
-                          $process = Start-Process -FilePath `"$PSScriptRoot\#MSUFile#`" -ArgumentList "/q /norestart" -Wait -PassThru
-                         Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
+                          $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/q /norestart" -Wait -PassThru
+                         Exit $process.ExitCode' -replace "#File#", $installerFileName }
                         } 
           }
     'msu' { 
             '# Invoke Installer
-            $process = Start-Process  -FilePath wusa.exe -ArgumentList "`"$PSScriptRoot\#MSUFile#`" /quiet /norestart" -Wait -PassThru
-            Exit $process.ExitCode' -replace "#MSUFile#", $installerFileName }
+            $process = Start-Process  -FilePath wusa.exe -ArgumentList "`"$PSScriptRoot\#File#`" /quiet /norestart" -Wait -PassThru
+            Exit $process.ExitCode' -replace "#File#", $installerFileName }
           }
 } 
 
