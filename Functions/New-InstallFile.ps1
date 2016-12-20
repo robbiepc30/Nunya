@@ -8,7 +8,8 @@
 
         # Installer Types msu, msi, exe
         [ValidateSet("msu", "msi", "exe")]
-        [String[]]$Type = @("msu", "msi", "exe")
+        [String[]]$Type = @("msu", "msi", "exe"),
+        [Switch]$Force
     )
 
     $includeTypes = $Type |  ForEach-Object {"*.$_"}
@@ -26,8 +27,22 @@ function createInstallerFile ($File, $Code)
     $FullName = $File.FullName
     $installerFileName = Split-Path -Path $FullName -Leaf
     $ps1InstallFileName = $FullName + ".Install.ps1"
-    Write-Verbose "Creating $ps1InstallFileName File"
-    Set-Content -Path $ps1InstallFileName -Value $Code -Encoding UTF8
+
+    # If force switch is used overwrite file if it already exist
+    if ($Force) {
+        Write-Verbose "Creating $ps1InstallFileName File"
+        Set-Content -Path $ps1InstallFileName -Value $Code -Encoding UTF8 
+    } 
+    else { # Check if file already exist, if so give warning
+        if (!(Test-Path -Path $ps1InstallFileName)) {
+            Write-Verbose "Creating $ps1InstallFileName File"
+            Set-Content -Path $ps1InstallFileName -Value $Code -Encoding UTF8  
+        } 
+        else {
+            Write-Warning -Message "$ps1InstallFileName file already exist, use -Force switch to overwrite file"
+        }
+    }
+    
     
 }
 
