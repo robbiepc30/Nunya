@@ -60,7 +60,9 @@ function generateInstallerCode ($File)
     'exe' { 
             $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
                            elseif ($File.VersionInfo.ProductName -like '*java*') {"Java"}
-            switch ($productType) {
+                           else { "This is needed for Default to run..., otherwise if null switch will be skipped" }
+            switch ($productType) 
+            {
                 "Adobe" { 
                         '# Invoke Installer
                         $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/sAll /rs" -Wait -PassThru
@@ -74,8 +76,9 @@ function generateInstallerCode ($File)
                 Default {   
                          '# Invoke Installer
                           $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/q /norestart" -Wait -PassThru
-                         Exit $process.ExitCode' -replace "#File#", $installerFileName }
+                         Exit $process.ExitCode' -replace "#File#", $installerFileName
                         } 
+            }
           }
     'msu' { 
             '# Invoke Installer
