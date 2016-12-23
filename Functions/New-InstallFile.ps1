@@ -65,17 +65,17 @@ function generateInstallerCode ($File)
             {
                 "Adobe" { 
                         '# Invoke Installer
-                        $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/sAll /rs" -Wait -PassThru
+                        $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/sAll /rs" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#File#", $installerFileName 
                        }
                "Java" { 
                         '# Invoke Installer
-                        $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/s" -Wait -PassThru
+                        $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/s" -Wait -PassThru
                         Exit $process.ExitCode' -replace "#File#", $installerFileName 
                       }
                 Default {   
                          '# Invoke Installer
-                          $process = Start-Process -FilePath `"$PSScriptRoot\#File#`" -ArgumentList "/q /norestart" -Wait -PassThru
+                          $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/q /norestart" -Wait -PassThru
                          Exit $process.ExitCode' -replace "#File#", $installerFileName
                         } 
             }
