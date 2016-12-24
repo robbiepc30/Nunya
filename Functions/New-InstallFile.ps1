@@ -60,24 +60,34 @@ function generateInstallerCode ($File)
     'exe' { 
             $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
                            elseif ($File.VersionInfo.ProductName -like '*java*') {"Java"}
+                           elseif ($File.Name -like '*Firefox*') {"Firefox"}
                            else { "This is needed for Default to run..., otherwise if null switch will be skipped" }
             switch ($productType) 
             {
-                "Adobe" { 
-                        '# Invoke Installer
-                        $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/sAll /rs" -Wait -PassThru
-                        Exit $process.ExitCode' -replace "#File#", $installerFileName 
-                       }
-               "Java" { 
-                        '# Invoke Installer
-                        $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/s" -Wait -PassThru
-                        Exit $process.ExitCode' -replace "#File#", $installerFileName 
-                      }
-                Default {   
-                         '# Invoke Installer
-                          $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/q /norestart" -Wait -PassThru
-                         Exit $process.ExitCode' -replace "#File#", $installerFileName
-                        } 
+               "Adobe" 
+                { 
+                    '# Invoke Installer
+                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/sAll /rs" -Wait -PassThru
+                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+                }
+               "Java" 
+               { 
+                    '# Invoke Installer
+                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/s" -Wait -PassThru
+                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+               }
+               "Firefox" 
+               {
+                   '# Invoke Installer
+                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "-ms" -Wait -PassThru
+                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+               }
+               Default 
+               {   
+                    '# Invoke Installer
+                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/q /norestart" -Wait -PassThru
+                    Exit $process.ExitCode' -replace "#File#", $installerFileName
+               } 
             }
           }
     'msu' { 
