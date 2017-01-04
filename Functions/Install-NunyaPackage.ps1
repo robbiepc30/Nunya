@@ -10,27 +10,33 @@ function Install-NunyaPackage {
     $filnameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
     $installerLogDirectory = Join-Path $nunyaLogDirectory $filnameWOExtention
     if (!(Test-Path $installerLogDirectory)) { New-Item -Path $installerLogDirectory -ItemType Directory | Out-Null }
-    
     $stdOutLog = Join-Path $installerLogDirectory "stdOut.log"
     $stdErrLog = Join-Path $installerLogDirectory "stdErr.log"
 
     $fileType = [System.IO.Path]::GetExtension($FilePath).Replace(".", "")
-    
-    if ($fileType -eq "msi")
-    {
-        $installLog = Join-Path $installerLogDirectory "install.log"
-        $msiArgs = "/i `"$FilePath`" /l*vx `"$installLog`" $SilentArgs"
-        $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-        $process.ExitCode
-    }
 
-    if ($fileType -eq "msu") 
-    {
-        $installLog = Join-Path $installerLogDirectory "install.etl"
-        $msuArgs = "/log `"$installLog`" $SilentArgs"
+    switch ($fileType) {
+        "msi" 
+        {  
+            $InstallLogPath = Join-Path $installerLogDirectory "install.log"
+            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLogPath`" $SilentArgs"
+            $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            return $process.ExitCode
+        }
+        "msu" 
+        {
+            $InstallLogPath = Join-Path $installerLogDirectory "install.etl"
+            $msuArgs = "`"$FilePath`" /log:`"$InstallLogPath`" $SilentArgs"
 
-        $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-        $process.ExitCode
+            $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            return $process.ExitCode
+        }
+        "exe" 
+        {
+            $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            return $process.ExitCode
+        }
+        Default { throw "Unknown file type , Install-NunyaPackage can install, .msi, .msu, and .exe file types"}
     }
 }
 
