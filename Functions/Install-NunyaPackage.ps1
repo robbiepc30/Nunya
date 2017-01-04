@@ -1,10 +1,14 @@
 function Install-NunyaPackage {
     [CmdletBinding()]
     param(
+        [Parameter(Mandatory=$true)]
         [string]$FilePath,
-        [string[]]$SilentArgs
+        [string[]]$SilentArgs = ""
     )
     
+    # Test if file exist
+    if (!(Test-Path $FilePath)) { throw "`"$FilePath`" file cannot be found. Check the -FilePath parameter and try again" }
+
     # Setup loging directory and log paths
     $nunyaLogDirectory = Join-Path $env:temp "Nunya"
     $filnameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
@@ -36,10 +40,11 @@ function Install-NunyaPackage {
             $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             return $process.ExitCode
         }
-        Default { throw "Unknown file type , Install-NunyaPackage can install, .msi, .msu, and .exe file types"}
+        Default { throw "Unknown file type `".$fileType`" , Install-NunyaPackage can install, .msi, .msu, or .exe file types"}
     }
 }
 
 
-Install-NunyaPackage -FilePath "C:\Users\robert.p.courtney\Desktop\Win7x6-Client-Image-Patches\Win7x64\MS16-087\Windows6.1-KB3170455-x64.msu" -SilentArgs "/quiet /norestart"
+#Install-NunyaPackage -FilePath "C:\Users\robert.p.courtney\Desktop\Win7x6-Client-Image-Patches\Win7x64\MS16-087\Windows6.1-KB3170455-x64.msu" -SilentArgs "/quiet /norestart"
+Install-NunyaPackage -FilePath "c:test.exe" -SilentArgs "/s"
 
