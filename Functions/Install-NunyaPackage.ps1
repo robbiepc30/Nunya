@@ -30,7 +30,7 @@ function Install-NunyaPackage {
             Write-Verbose "Installing $filename..."
             $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $exitCode = $process.ExitCode
-            # return exit code if not null or empty
+            # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
         "msu" 
@@ -39,14 +39,14 @@ function Install-NunyaPackage {
             $msuArgs = "`"$FilePath`" /log:`"$InstallLogPath`" $SilentArgs"
 
             $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-            # return exit code if not null or empty
+            # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
         "exe" 
         {
             $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $exitCode = $process.ExitCode
-            # return exit code if not null or empty
+            # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
         Default { throw "Unknown file type `".$fileType`" , Install-NunyaPackage can install, .msi, .msu, or .exe file types"}

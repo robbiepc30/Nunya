@@ -18,32 +18,35 @@ Describe "Install-NunyaPackage" {
     }
 
     Context "Test switch for install type .msi" {
+        #Arrange
 
-        $filePathArg = "c:\test.msi"
-        $filename = [System.IO.Path]::GetFileName($filePathArg)
-        $argumentListArg = "/i `"$filePathArg`" /l*vx `"C:\Users\robert.p.courtney\AppData\Local\Temp\Nunya\$filename\install.log`" /quiet /norestart"
+        # Install-NunyaPackage args
+        $fiePath = "c:\test.msi"
+        $argumentList = "/quiet /norestart"
+
+        # Mocking args and vars
+        $filnameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($fiePath)
+        $filename = [System.IO.Path]::GetFileName($fiePath)
+        $startProcArgList = "/i `"$fiePath`" /l*vx `"C:\Users\robert.p.courtney\AppData\Local\Temp\Nunya\$filnameWOExtention\install.log`" /quiet /norestart"
+        $msiExecPath = "$env:SystemRoot\System32\msiexec.exe"
+        
+        Mock Start-Process {} -ParameterFilter { ($FilePath -eq $msiExecPath) -and ($ArgumentList -eq $startProcArgList) }
         Mock Test-Path { $true }
-        Mock Start-Process {} -ParameterFilter { ($filePath -eq $filePathArg) -and ($ArgumentList -eq $argumentListArgs) }
 
-        Mock T {} -ParameterFilter { ($SomeParam -eq "t") -and ($OtherParam -eq "o")}
+
         It "Should execute msi switch block" {
-            #Arrange
+            
             #Act
-            $result = Install-NunyaPackage -FilePath $filePathArg -SilentArgs $argumentListArgs -Verbose 4>&1
+            $result = Install-NunyaPackage -FilePath $fiePath -SilentArgs $startProcArgLists -Verbose 4>&1
             #Assert
-            #Write-Verbose "Somthing is installing" -Verbose 4>&1 | Should Match "installing"
             $result | Should Match "installing $filename"
         }
 
-        It "Testing multi parameters with Assert-MockCalled" {
-            #Arrange
+        It "Should run Start-Process with correct args for MSI install" {          
             #Act
-            $r = T -SomeParam "t" "o"
-            #Assert-MockCalled Start-Process -ParameterFilter {($filePath -eq $filePathArg) -and ($ArgumentList -eq $argumentListArgs)} -Exactly 1
-            Assert-MockCalled T -ParameterFilter { ($SomeParam -eq "t") -and ($OtherParam -eq "o")} -Exactly 1
-
+            $result = Install-NunyaPackage -FilePath $fiePath -SilentArgs $argumentList
+            #Assert
+            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $msiExecPath) -and ($ArgumentList -eq $startProcArgList) } -Exactly 1
         }
-
     }
-
 }
