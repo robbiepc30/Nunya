@@ -125,5 +125,22 @@ Describe "Install-NunyaPackage" {
             #Assert
             Assert-MockCalled Out-File -ParameterFilter { ($FilePath -eq $exitCodeLog) -and ($InputObject -eq 2) } -Exactly 1
         }
+
+        It "Should use silent args from parameter if they are provided" {
+            #Arrange
+            $custumSilentArgs = "/Custom /OtherSwitch"
+            #Act
+            $result = Install-NunyaPackage -FilePath $filePath -SilentArgs $custumSilentArgs
+            #Assert
+            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $custumSilentArgs } -Exactly 1
+        }
+
+        It "Should supply correct silent arguments for MSI installer if none are provided" {
+           $result =  Install-NunyaPackage -FilePath $filePath
+
+           # Should have ran twice with the silent args, once from the (It "Should execute msu switch block")
+           #    and once from this It block
+           Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $silentArgs } -Exactly 2
+        }
     }
 }

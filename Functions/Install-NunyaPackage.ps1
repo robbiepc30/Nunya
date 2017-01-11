@@ -42,7 +42,7 @@ function Install-NunyaPackage {
         "msu" 
         {
             # Set default silent args for MSI install if none are provided
-            #if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
+            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
             $InstallLog = Join-Path $installerLogDirectory "install.etl"
             $msuArgs = "`"$FilePath`" /log:`"$InstallLog`" $SilentArgs"
 
