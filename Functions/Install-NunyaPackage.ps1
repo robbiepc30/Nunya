@@ -12,33 +12,35 @@ function Install-NunyaPackage {
 
     # Setup loging directory and log paths
     $nunyaLogDirectory = Join-Path $env:temp "Nunya"
-    $filnameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
+    $filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
     $filename = [System.IO.Path]::GetFileName($FilePath)
-    $installerLogDirectory = Join-Path $nunyaLogDirectory $filnameWOExtention
+    $installerLogDirectory = Join-Path $nunyaLogDirectory $filenameWOExtention
     if (!(Test-Path $installerLogDirectory)) { New-Item -Path $installerLogDirectory -ItemType Directory | Out-Null }
     $stdOutLog = Join-Path $installerLogDirectory "stdOut.log"
     $stdErrLog = Join-Path $installerLogDirectory "stdErr.log"
+    $exitCodeLog = Join-Path $installerLogDirectory "exitCode.log"
 
     $fileType = [System.IO.Path]::GetExtension($FilePath).Replace(".", "")
     
     switch ($fileType) {
         "msi" 
         {  
-            $InstallLogPath = Join-Path $installerLogDirectory "install.log"
-            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLogPath`" $SilentArgs"
+            $InstallLog = Join-Path $installerLogDirectory "install.log"
+            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLog`" $SilentArgs"
             Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs"
             Write-Verbose "Installing $filename..."
             $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-            $exitCode = $process.ExitCode
+            $process.ExitCode | Out-File -FilePath $exitCodeLog 
             # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
         "msu" 
         {
-            $InstallLogPath = Join-Path $installerLogDirectory "install.etl"
-            $msuArgs = "`"$FilePath`" /log:`"$InstallLogPath`" $SilentArgs"
+            $InstallLog = Join-Path $installerLogDirectory "install.etl"
+            $msuArgs = "`"$FilePath`" /log:`"$InstallLog`" $SilentArgs"
 
             $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            $process.ExitCode | Out-File -FilePath $exitCodeLog
             # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
@@ -46,6 +48,7 @@ function Install-NunyaPackage {
         {
             $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $exitCode = $process.ExitCode
+            $process.ExitCode | Out-File -FilePath $exitCodeLog
             # return exit code if not null or empty Needed for Pester Test
             if ($process.ExitCode) { return $process.ExitCode }
         }
