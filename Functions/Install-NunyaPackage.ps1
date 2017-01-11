@@ -4,7 +4,8 @@ function Install-NunyaPackage {
     param(
         [Parameter(Mandatory=$true)]
         [string]$FilePath,
-        [string[]]$SilentArgs = ""
+        [string[]]$SilentArgs,
+        [string]$LogArgs
     )
     
     # Test if file exist
@@ -25,10 +26,14 @@ function Install-NunyaPackage {
     switch ($fileType) {
         "msi" 
         {  
+            # Set default silent args for MSI install if none are provided
+            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
             $InstallLog = Join-Path $installerLogDirectory "install.log"
             $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLog`" $SilentArgs"
+            
             Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs"
-            Write-Verbose "Installing $filename..."
+            Write-Verbose "Installing .msi type: $filename..."
+            
             $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $process.ExitCode | Out-File -FilePath $exitCodeLog 
             # return exit code if not null or empty Needed for Pester Test
@@ -36,8 +41,13 @@ function Install-NunyaPackage {
         }
         "msu" 
         {
+            # Set default silent args for MSI install if none are provided
+            #if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
             $InstallLog = Join-Path $installerLogDirectory "install.etl"
             $msuArgs = "`"$FilePath`" /log:`"$InstallLog`" $SilentArgs"
+
+            Write-Debug "Starting MSU installer:  $env:SystemRoot\System32\wusa.exe with Arguments: $msuArgs"
+            Write-Verbose "Installing .msu type: $filename..."
 
             $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $process.ExitCode | Out-File -FilePath $exitCodeLog
@@ -46,6 +56,9 @@ function Install-NunyaPackage {
         }
         "exe" 
         {
+            Write-Debug "Starting EXE installer:  $filename : $SilentArgs"
+            Write-Verbose "Installing .exe type: $filename..."
+
             $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $exitCode = $process.ExitCode
             $process.ExitCode | Out-File -FilePath $exitCodeLog
