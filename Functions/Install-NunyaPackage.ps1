@@ -4,8 +4,7 @@ function Install-NunyaPackage {
     param(
         [Parameter(Mandatory=$true)]
         [string]$FilePath,
-        [string[]]$SilentArgs,
-        [string]$LogArgs
+        [string[]]$SilentArgs
     )
     
     # Test if file exist
@@ -29,8 +28,7 @@ function Install-NunyaPackage {
             # Set default silent args for MSI install if none are provided
             $installLog = Join-Path $installerLogDirectory "install.log"
             if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
-            if (!$LogArgs) { $LogArgs = "/l*vx `"$installLog`""}
-            $msiArgs = "/i `"$FilePath`" $LogArgs $SilentArgs"
+            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLog`" $SilentArgs"
             
             Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs"
             Write-Verbose "Installing .msi type: $filename..."
@@ -71,9 +69,6 @@ function Install-NunyaPackage {
     }
 }
 
-function fixQuotesOnStrings ($String) {
-    
-}
 #Install-NunyaPackage -FilePath "C:\Users\robert.p.courtney\Desktop\Win7x6-Client-Image-Patches\Win7x64\MS16-087\Windows6.1-KB3170455-x64.msu" -SilentArgs "/quiet /norestart"
 #Install-NunyaPackage -FilePath "c:test.exe" -SilentArgs "/s"
 
