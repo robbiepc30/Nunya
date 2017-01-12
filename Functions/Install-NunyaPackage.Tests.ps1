@@ -135,10 +135,11 @@ Describe "Install-NunyaPackage" {
         }
 
         It "Should supply correct silent arguments for MSI installer if none are provided" {
+           #Act
            $result =  Install-NunyaPackage -FilePath $_filePath
--
            # Should have ran twice with the silent args, once from the (It "Should execute msu switch block")
            #    and once from this It block
+           #Assert
            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_silentArgs } -Exactly 2
         }
     }
