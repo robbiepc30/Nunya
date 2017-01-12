@@ -23,40 +23,40 @@ Describe "Install-NunyaPackage" {
         #Arrange
 
         # Install-NunyaPackage args
-        $filePath = "c:\test.msi"
-        $silentArgs = "/quiet /norestart"
+        $_filePath = "c:\test.msi"
+        $_silentArgs = "/quiet /norestart"
 
         # Mocking args and vars
         $_nunyaLogDirectory = Join-Path $env:temp "Nunya"
-        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($filePath)
-        $_filename = [System.IO.Path]::GetFileName($filePath)
+        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($_filePath)
+        $_filename = [System.IO.Path]::GetFileName($_filePath)
         $_installerLogDirectory = Join-Path $_nunyaLogDirectory $_filenameWOExtention
         $_exitCodeLog = Join-Path $_installerLogDirectory "exitCode.log"
         $_InstallLog = Join-Path $_installerLogDirectory "install.log"
         
-        $msiArgsForStartProcess = "/i `"$filePath`" /l*vx `"$_InstallLog`" $silentArgs"
-        $msiExecPath = "$env:SystemRoot\System32\msiexec.exe"
+        $_msiArgsForStartProcess = "/i `"$_filePath`" /l*vx `"$_InstallLog`" $_silentArgs"
+        $_msiExecPath = "$env:SystemRoot\System32\msiexec.exe"
         
         Mock Start-Process {[PSCustomObject]@{ExitCode = 8}}
         Mock Out-File {}
         
         # Mock the first Test-Path, the one that checks to see if the installer file exist
-        Mock Test-Path { $true } -ParameterFilter { $Path -eq $filePath }
+        Mock Test-Path { $true } -ParameterFilter { $Path -eq $_filePath }
 
         It "Should execute msi switch block" {
             #Act
             # Always make this an array, sometimes it  might only return one item in the pipeline
             #   if an exit code is not returned.  This always wraps the item(s) in an array
             #   I am only interested in the first item the verbose message for this test
-            #$result = @(Install-NunyaPackage -FilePath $filePath -SilentArgs $silentArgs -Verbose 4>&1)[0]
-            $result = @(Install-NunyaPackage -FilePath $filePath -SilentArgs $silentArgs -Verbose 4>&1)[0]
+            #$result = @(Install-NunyaPackage -FilePath $_filePath -SilentArgs $_silentArgs -Verbose 4>&1)[0]
+            $result = @(Install-NunyaPackage -FilePath $_filePath -SilentArgs $_silentArgs -Verbose 4>&1)[0]
             #Assert
             $result | Should Match "Installing .msi type: $_filename"
         }
 
         It "Should run Start-Process with correct args for MSI install" {          
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $msiExecPath) -and ($ArgumentList -eq $msiArgsForStartProcess) } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $_msiExecPath) -and ($ArgumentList -eq $_msiArgsForStartProcess) } -Exactly 1
         }
 
         It "Should write ExitCode to file, Out-File with correct args" {
@@ -66,58 +66,59 @@ Describe "Install-NunyaPackage" {
 
         It "Should use silent args from parameter if they are provided" {
             #Arrange
-            $custumSilentArgs = "/Custom /OtherSwitch"
+            $_custumSilentArgs = "/Custom /OtherSwitch"
             #Act
-            $result = Install-NunyaPackage -FilePath $filePath -SilentArgs $custumSilentArgs
+            $result = Install-NunyaPackage -FilePath $_filePath -SilentArgs $_custumSilentArgs
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $custumSilentArgs } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_custumSilentArgs } -Exactly 1
         }
 
         It "Should supply correct silent arguments for MSI installer if none are provided" {
-           $result =  Install-NunyaPackage -FilePath $filePath
+           $result =  Install-NunyaPackage -FilePath $_filePath
 
            # Should have ran twice with the silent args, once from the (It "Should execute msi switch block")
            #    and once from this It block
-           Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $silentArgs } -Exactly 2
+           Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_silentArgs } -Exactly 2
         }
+
     }
 
     Context "Test switch for install type .msu" {
         
         #***Arrange***
         # Install-NunyaPackage args
-        $filePath = "c:\test.msu"
-        $silentArgs = "/quiet /norestart"
+        $_filePath = "c:\test.msu"
+        $_silentArgs = "/quiet /norestart"
 
         # Mocking args and vars
         $_nunyaLogDirectory = Join-Path $env:temp "Nunya"
-        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($filePath)
-        $_filename = [System.IO.Path]::GetFileName($filePath)
+        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($_filePath)
+        $_filename = [System.IO.Path]::GetFileName($_filePath)
         $_installerLogDirectory = Join-Path $_nunyaLogDirectory $_filenameWOExtention
         $_exitCodeLog = Join-Path $_installerLogDirectory "exitCode.log"
         $_InstallLog = Join-Path $_installerLogDirectory "install.etl"
 
-        $msuArgs = "`"$FilePath`" /log:`"$_InstallLog`" $silentArgs"
-        $wusaExecPath = "$env:SystemRoot\System32\wusa.exe"
+        $_msuArgs = "`"$_FilePath`" /log:`"$_InstallLog`" $_silentArgs"
+        $_wusaExecPath = "$env:SystemRoot\System32\wusa.exe"
         
         Mock Start-Process {[PSCustomObject]@{ExitCode = 2}}
         Mock Out-File {}
         # Mock the first Test-Path, the one that checks to see if the installer file exist
-        Mock Test-Path { $true } -ParameterFilter { $Path -eq $filePath }
+        Mock Test-Path { $true } -ParameterFilter { $Path -eq $_filePath }
 
         It "Should execute msu switch block" {
             #Act
             # Always make this an array, sometimes it  might only return one item in the pipeline
             #   if an exit code is not returned.  This always wraps the item(s) in an array
             #   I am only interested in the first item the verbose message for this test
-            $result = @(Install-NunyaPackage -FilePath $filePath -SilentArgs $silentArgs -Verbose 4>&1)[0]
+            $result = @(Install-NunyaPackage -FilePath $_filePath -SilentArgs $_silentArgs -Verbose 4>&1)[0]
             #Assert
             $result | Should Match "Installing .msu type: $_filename"
         }
 
         It "Should run Start-Process with correct args for MSU install" {          
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $wusaExecPath) -and ($ArgumentList -eq $msuArgs) } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $_wusaExecPath) -and ($ArgumentList -eq $_msuArgs) } -Exactly 1
         }
 
         It "Should write ExitCode to file, Out-File with correct args" {
@@ -127,19 +128,19 @@ Describe "Install-NunyaPackage" {
 
         It "Should use silent args from parameter if they are provided" {
             #Arrange
-            $custumSilentArgs = "/Custom /OtherSwitch"
+            $_custumSilentArgs = "/Custom /OtherSwitch"
             #Act
-            $result = Install-NunyaPackage -FilePath $filePath -SilentArgs $custumSilentArgs
+            $result = Install-NunyaPackage -FilePath $_filePath -SilentArgs $_custumSilentArgs
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $custumSilentArgs } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_custumSilentArgs } -Exactly 1
         }
 
         It "Should supply correct silent arguments for MSI installer if none are provided" {
-           $result =  Install-NunyaPackage -FilePath $filePath
+           $result =  Install-NunyaPackage -FilePath $_filePath
 
            # Should have ran twice with the silent args, once from the (It "Should execute msu switch block")
            #    and once from this It block
-           Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $silentArgs } -Exactly 2
+           Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_silentArgs } -Exactly 2
         }
     }
 
@@ -147,34 +148,34 @@ Describe "Install-NunyaPackage" {
         
         #***Arrange***
         # Install-NunyaPackage args
-        $filePath = "c:\test.exe"
-        $silentArgs = "/sAll /rs"
+        $_filePath = "c:\test.exe"
+        $_silentArgs = "/sAll /rs"
 
         # Mocking args and vars
         $_nunyaLogDirectory = Join-Path $env:temp "Nunya"
-        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($filePath)
-        $_filename = [System.IO.Path]::GetFileName($filePath)
+        $_filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($_filePath)
+        $_filename = [System.IO.Path]::GetFileName($_filePath)
         $_installerLogDirectory = Join-Path $_nunyaLogDirectory $_filenameWOExtention
         $_exitCodeLog = Join-Path $_installerLogDirectory "exitCode.log"
         
         Mock Start-Process {[PSCustomObject]@{ExitCode = 10}}
         Mock Out-File {}
         # Mock the first Test-Path, the one that checks to see if the installer file exist
-        Mock Test-Path { $true } -ParameterFilter { $Path -eq $filePath }
+        Mock Test-Path { $true } -ParameterFilter { $Path -eq $_filePath }
 
         It "Should execute exe switch block" {
             #Act
             # Always make this an array, sometimes it  might only return one item in the pipeline
             #   if an exit code is not returned.  This always wraps the item(s) in an array
             #   I am only interested in the first item the verbose message for this test
-            $result = @(Install-NunyaPackage -FilePath $filePath -SilentArgs $silentArgs -Verbose 4>&1)[0]
+            $result = @(Install-NunyaPackage -FilePath $_filePath -SilentArgs $_silentArgs -Verbose 4>&1)[0]
             #Assert
             $result | Should Match "Installing .exe type: $_filename"
         }
 
         It "Should run Start-Process with correct args for EXE install" {          
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $FilePath) -and ($ArgumentList -eq $silentArgs) } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $_FilePath) -and ($ArgumentList -eq $_silentArgs) } -Exactly 1
         }
 
         It "Should write ExitCode to file, Out-File with correct args" {
@@ -184,16 +185,16 @@ Describe "Install-NunyaPackage" {
 
         It "Should use silent args from parameter if they are provided" {
             #Arrange
-            $custumSilentArgs = "/Custom /OtherSwitch"
+            $_custumSilentArgs = "/Custom /OtherSwitch"
             #Act
-            $result = Install-NunyaPackage -FilePath $filePath -SilentArgs $custumSilentArgs
+            $result = Install-NunyaPackage -FilePath $_filePath -SilentArgs $_custumSilentArgs
             #Assert
-            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $FilePath) -and ($ArgumentList -match $custumSilentArgs) } -Exactly 1
+            Assert-MockCalled Start-Process -ParameterFilter { ($FilePath -eq $_FilePath) -and ($ArgumentList -match $_custumSilentArgs) } -Exactly 1
         }
 
         It "Should throw error if silent args are not provided for EXE installer" {
            #Act, Assert
-           { Install-NunyaPackage -FilePath $filePath } | should throw '-SilentArgs Parameter must be provided an argument.  Example: -SilentArgs "/S"'
+           { Install-NunyaPackage -FilePath $_filePath } | should throw '-SilentArgs Parameter must be provided an argument.  Example: -SilentArgs "/S"'
         }
     }
     
