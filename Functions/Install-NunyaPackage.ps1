@@ -56,6 +56,7 @@ function Install-NunyaPackage {
         }
         "exe" 
         {
+            if (!$SilentArgs) { throw '-SilentArgs Parameter must be provided an argument.  Example: -SilentArgs "/S"'}
             Write-Debug "Starting EXE installer:  $filename : $SilentArgs"
             Write-Verbose "Installing .exe type: $filename..."
 
