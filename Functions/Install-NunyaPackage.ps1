@@ -60,7 +60,6 @@ function Install-NunyaPackage {
             Write-Verbose "Installing .exe type: $filename..."
 
             $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-            $exitCode = $process.ExitCode
             $process.ExitCode | Out-File -FilePath $exitCodeLog
             
             return $process.ExitCode 
@@ -68,7 +67,4 @@ function Install-NunyaPackage {
         Default { throw "Unknown file type `".$fileType`" , Install-NunyaPackage can install, .msi, .msu, or .exe file types"}
     }
 }
-
-#Install-NunyaPackage -FilePath "C:\Users\robert.p.courtney\Desktop\Win7x6-Client-Image-Patches\Win7x64\MS16-087\Windows6.1-KB3170455-x64.msu" -SilentArgs "/quiet /norestart"
-#Install-NunyaPackage -FilePath "c:test.exe" -SilentArgs "/s"
 
