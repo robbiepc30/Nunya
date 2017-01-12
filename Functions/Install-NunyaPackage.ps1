@@ -27,9 +27,10 @@ function Install-NunyaPackage {
         "msi" 
         {  
             # Set default silent args for MSI install if none are provided
+            $installLog = Join-Path $installerLogDirectory "install.log"
             if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
-            $InstallLog = Join-Path $installerLogDirectory "install.log"
-            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLog`" $SilentArgs"
+            if (!$LogArgs) { $LogArgs = "/l*vx `"$installLog`""}
+            $msiArgs = "/i `"$FilePath`" $LogArgs $SilentArgs"
             
             Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs"
             Write-Verbose "Installing .msi type: $filename..."
@@ -43,8 +44,8 @@ function Install-NunyaPackage {
         {
             # Set default silent args for MSI install if none are provided
             if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
-            $InstallLog = Join-Path $installerLogDirectory "install.etl"
-            $msuArgs = "`"$FilePath`" /log:`"$InstallLog`" $SilentArgs"
+            $installLog = Join-Path $installerLogDirectory "install.etl"
+            $msuArgs = "`"$FilePath`" /log:`"$installLog`" $SilentArgs"
 
             Write-Debug "Starting MSU installer:  $env:SystemRoot\System32\wusa.exe with Arguments: $msuArgs"
             Write-Verbose "Installing .msu type: $filename..."
@@ -70,6 +71,9 @@ function Install-NunyaPackage {
     }
 }
 
+function fixQuotesOnStrings ($String) {
+    
+}
 #Install-NunyaPackage -FilePath "C:\Users\robert.p.courtney\Desktop\Win7x6-Client-Image-Patches\Win7x64\MS16-087\Windows6.1-KB3170455-x64.msu" -SilentArgs "/quiet /norestart"
 #Install-NunyaPackage -FilePath "c:test.exe" -SilentArgs "/s"
 

@@ -81,6 +81,15 @@ Describe "Install-NunyaPackage" {
            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_silentArgs } -Exactly 2
         }
 
+        It "Should use log args from parameter if they are provided" {
+            #Arrange
+            $_custumLogArgs = "/LogMe `"c:\someLocation.log`""
+            #Act
+            $result = Install-NunyaPackage -FilePath $_filePath -LogArgs $_custumLogArgs
+            #Assert
+            Assert-MockCalled Start-Process -ParameterFilter { $ArgumentList -match $_custumLogArgs } -Exactly 2
+        }
+
     }
 
     Context "Test switch for install type .msu" {
