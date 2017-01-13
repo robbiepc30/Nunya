@@ -24,9 +24,9 @@
 
 function createInstallerFile ($File, $Code)
 {
-    $FullName = $File.FullName
-    $installerFileName = Split-Path -Path $FullName -Leaf
-    $ps1InstallFileName = $FullName + ".Install.ps1"
+    $filePath = $File.FullName
+    $fileName = Split-Path -Path $filePath -Leaf
+    $ps1InstallFileName = $filePath + ".Install.ps1"
 
     # If force switch is used overwrite file if it already exist
     if ($Force) {
@@ -46,17 +46,17 @@ function createInstallerFile ($File, $Code)
 
 function generateInstallerCode ($File) 
 {
-    $FullName = $File.FullName
-    $fileType = [System.IO.Path]::GetExtension($FilePath).Replace(".", "")
-    $installerType = $FullName.Split('.')[-1]
-    $filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
-    $installerFileName = Split-Path -Path $FullName -Leaf
-    switch ($installerType) {
+    $filePath = $File.FullName
+    $fileType = [System.IO.Path]::GetExtension($filePath).Replace(".", "")
+    $filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($filePath)
+    $filename = [System.IO.Path]::GetFileName($FilePath)
+
+    switch ($fileType) {
     'msi' { 
-            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $installerFileName
+            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $fileName
           }
     'msu' { 
-            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $installerFileName
+            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $fileName
           }
     'exe' { 
             $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
@@ -68,29 +68,31 @@ function generateInstallerCode ($File)
                "Adobe" 
                 { 
                     $silentArgs = "/sAll /rs"
-                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                 }
                "Java" 
                { 
                    $silentArgs = "/s"
-                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                }
                "Firefox" 
                {
                    $silentArgs = "-ms"
-                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                }
                "Microsoft" {
                    $nunyaLogDirectory = Join-Path $env:temp "Nunya"
                    $installerLogDirectory = Join-Path $nunyaLogDirectory $filenameWOExtention
                    $silentArgs = "/q /norestart"
+
+                   # lksdjfklsdjfkljsdklfjklsdfjklj#w
                    $logArgs = "/Log $nunyaLogDirectory = Join-Path $env:temp "Nunya""
-                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                }
                Default 
                {   
                    $silentArgs = "/q /norestart"
-                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                } 
             }
           }
