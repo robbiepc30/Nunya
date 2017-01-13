@@ -1,0 +1,17 @@
+﻿#MSI Installer Template
+
+try {
+    Import-Module Nunya -ErrorAction Stop
+}
+catch {
+    Write-Error 'You Must have the module "nunya" installed in a path that is included in the $env:PSModulePath  environment variable'
+    Exit
+}
+
+$packageArgs = @{
+    filePath = "$PSScriptRoot\#FilePath#"
+    logArgs = "#LogArgs#"
+}
+
+$exitCode = Install-NunyaPackage @packageArgs
+exit $exitCode

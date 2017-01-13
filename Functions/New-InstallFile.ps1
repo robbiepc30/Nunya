@@ -41,20 +41,22 @@ function createInstallerFile ($File, $Code)
         else {
             Write-Warning -Message "$ps1InstallFileName file already exist, use -Force switch to overwrite file"
         }
-    }
-       
+    }      
 }
 
 function generateInstallerCode ($File) 
 {
     $FullName = $File.FullName
+    $fileType = [System.IO.Path]::GetExtension($FilePath).Replace(".", "")
     $installerType = $FullName.Split('.')[-1]
+    $filenameWOExtention = [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
     $installerFileName = Split-Path -Path $FullName -Leaf
     switch ($installerType) {
     'msi' { 
-            '# Invoke Installer
-            $process = Start-Process -FilePath msiexec.exe -ArgumentList "/i `"$PSScriptRoot\#File#`" /quiet /norestart" -Wait -PassThru
-            Exit $process.ExitCode' -replace "#File#", $installerFileName 
+            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $installerFileName
+          }
+    'msu' { 
+            (Get-Content $PSScriptRoot\..\Resources\MSI-MSU.template) -replace "#FilePath#", $installerFileName
           }
     'exe' { 
             $productType = if ($File.VersionInfo.ProductName -like '*adobe*') {"Adobe"}
@@ -65,35 +67,34 @@ function generateInstallerCode ($File)
             {
                "Adobe" 
                 { 
-                    '# Invoke Installer
-                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/sAll /rs" -Wait -PassThru
-                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+                    $silentArgs = "/sAll /rs"
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
                 }
                "Java" 
                { 
-                    '# Invoke Installer
-                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/s" -Wait -PassThru
-                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+                   $silentArgs = "/s"
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
                }
                "Firefox" 
                {
-                   '# Invoke Installer
-                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "-ms" -Wait -PassThru
-                    Exit $process.ExitCode' -replace "#File#", $installerFileName 
+                   $silentArgs = "-ms"
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
+               }
+               "Microsoft" {
+                   $nunyaLogDirectory = Join-Path $env:temp "Nunya"
+                   $installerLogDirectory = Join-Path $nunyaLogDirectory $filenameWOExtention
+                   $silentArgs = "/q /norestart"
+                   $logArgs = "/Log $nunyaLogDirectory = Join-Path $env:temp "Nunya""
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
                }
                Default 
                {   
-                    '# Invoke Installer
-                    $process = Start-Process -FilePath `""$PSScriptRoot\#File#"`" -ArgumentList "/q /norestart" -Wait -PassThru
-                    Exit $process.ExitCode' -replace "#File#", $installerFileName
+                   $silentArgs = "/q /norestart"
+                    ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $installerFileName) -replace "#SilentArgs#", $silentArgs
                } 
             }
           }
-    'msu' { 
-            '# Invoke Installer
-            $process = Start-Process  -FilePath wusa.exe -ArgumentList "`"$PSScriptRoot\#File#`" /quiet /norestart" -Wait -PassThru
-            Exit $process.ExitCode' -replace "#File#", $installerFileName }
-          }
+    }
 } 
 
 

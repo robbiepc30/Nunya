@@ -32,13 +32,13 @@ function Invoke-Install
                        -CurrentOperation "Installing $installerName" `
                        -PercentComplete (($installerScripts.IndexOf($i)/$installerScripts.Length)*100)
 
-        Write-Verbose "Installing $installerName"
+        Write-Host -ForegroundColor Green "Installing $installerName"
         & $i.FullName
         if ($otherErrorCodes.ContainsKey($LASTEXITCODE)) {
-            Write-Verbose " `t`t: $($otherErrorCodes.$LASTEXITCODE) , Exit code: $LASTEXITCODE"
+            Write-Host -ForegroundColor Cyan " `t`t: $($otherErrorCodes.$LASTEXITCODE) , Exit code: $LASTEXITCODE"
         } 
         else {
-            Write-Verbose " `t`t : $([ComponentModel.Win32Exception]$LASTEXITCODE) , Exit code: $LASTEXITCODE"
+             Write-Host -ForegroundColor Cyan " `t`t : $([ComponentModel.Win32Exception]$LASTEXITCODE) , Exit code: $LASTEXITCODE"
         }
     }
 }

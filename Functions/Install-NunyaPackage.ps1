@@ -4,7 +4,8 @@ function Install-NunyaPackage {
     param(
         [Parameter(Mandatory=$true)]
         [string]$FilePath,
-        [string[]]$SilentArgs
+        [string[]]$SilentArgs,
+        [string]$LogArgs
     )
     
     # Test if file exist
@@ -59,7 +60,7 @@ function Install-NunyaPackage {
             Write-Debug "Starting EXE installer:  $filename : $SilentArgs"
             Write-Verbose "Installing .exe type: $filename..."
 
-            $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs, $LogArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $process.ExitCode | Out-File -FilePath $exitCodeLog
             
             return $process.ExitCode 
