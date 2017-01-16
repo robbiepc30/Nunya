@@ -58,7 +58,7 @@ function Install-NunyaPackage {
         }
         "exe" 
         {   
-            $file = Get-ChildItem -Path $FilePath
+            
             $productType = getProductType -File $file
 
             if (!$SilentArgs) { $SilentArgs = getExeSilentArgs -ExeProductType $productType }
@@ -68,8 +68,8 @@ function Install-NunyaPackage {
             Write-Verbose "Installing .exe type: $filename..."
 
             if (!$LogArgs) {
-                process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
-                process.ExitCode | Out-File -FilePath $exitCodeLog
+                $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+                $process.ExitCode | Out-File -FilePath $exitCodeLog
             }
             else {
                 $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs, $LogArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
@@ -83,10 +83,11 @@ function Install-NunyaPackage {
     }
 }
 
-function getProductType ($File) {
-    if ($File.VersionInfo.ProductName -like '*adobe*') { "Adobe" }
-    elseif ($File.VersionInfo.ProductName -like '*java*') { "Java" }
-    elseif ($File.Name -like '*Firefox*') { "Firefox" }
+function getProductType ($FilePath) {
+    $file = Get-ChildItem -Path $FilePath
+    if ($file.VersionInfo.ProductName -like '*adobe*') { "Adobe" }
+    elseif ($file.VersionInfo.ProductName -like '*java*') { "Java" }
+    elseif ($file.Name -like '*Firefox*') { "Firefox" }
     else { "Unkown" }
 }
 

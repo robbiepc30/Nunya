@@ -86,7 +86,7 @@ function generateInstallerCode ($File)
                    $silentArgs = "/q /norestart"
 
                    # lksdjfklsdjfkljsdklfjklsdfjklj#w
-                   $logArgs = "/Log $nunyaLogDirectory = Join-Path $env:temp "Nunya""
+                   #$logArgs = "/Log $nunyaLogDirectory = Join-Path $env:temp "Nunya""
                     ((Get-Content $PSScriptRoot\..\Resources\Standard-EXE.template) -replace "#FilePath#", $fileName) -replace "#SilentArgs#", $silentArgs
                }
                Default 
