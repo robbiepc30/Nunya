@@ -59,7 +59,7 @@ function Install-NunyaPackage {
         "exe" 
         {   
             
-            $productType = getProductType -File $file
+            $productType = getProductType -File $FilePath
 
             if (!$SilentArgs) { $SilentArgs = getExeSilentArgs -ExeProductType $productType }
             if (!$LogArgs) { $LogArgs = getExeLogArgs -ExeProductType $productType }
@@ -68,11 +68,11 @@ function Install-NunyaPackage {
             Write-Verbose "Installing .exe type: $filename..."
 
             if (!$LogArgs) {
-                $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+                $process = Start-Process -FilePath $FilePath -ArgumentList $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
                 $process.ExitCode | Out-File -FilePath $exitCodeLog
             }
             else {
-                $process = Start-Process -FilePath "$FilePath" -ArgumentList $SilentArgs, $LogArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+                $process = Start-Process -FilePath $FilePath -ArgumentList $SilentArgs, $LogArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
                 $process.ExitCode | Out-File -FilePath $exitCodeLog
             }
 
