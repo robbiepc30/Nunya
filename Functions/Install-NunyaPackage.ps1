@@ -28,13 +28,14 @@ function Install-NunyaPackage {
         {  
             # Set default silent args for MSI install if none are provided
             $installLog = Join-Path $installerLogDirectory "install.log"
-            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
-            $msiArgs = "/i `"$FilePath`" /l*vx `"$InstallLog`" $SilentArgs"
+            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart" }
+            if (!$LogArgs) { $LogArgs = "/l*vx `"$InstallLog`""}
+            $msiArgs = "/i `"$FilePath`""
             
-            Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs"
+            Write-Debug "Starting MSI installer:  $env:SystemRoot\System32\msiexec.exe with Arguments: $msiArgs $LogArgs $SilentArgs"
             Write-Verbose "Installing .msi type: $filename..."
             
-            $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            $process = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" -ArgumentList $msiArgs, $LogArgs, $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $process.ExitCode | Out-File -FilePath $exitCodeLog 
             
             return $process.ExitCode
@@ -42,14 +43,15 @@ function Install-NunyaPackage {
         "msu" 
         {
             # Set default silent args for MSI install if none are provided
-            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
             $installLog = Join-Path $installerLogDirectory "install.etl"
-            $msuArgs = "`"$FilePath`" /log:`"$installLog`" $SilentArgs"
+            if (!$SilentArgs) { $SilentArgs = "/quiet /norestart"}
+            if (!$LogArgs) { $LogArgs = "/log:`"$installLog`"" }
+            $msuArgs = "`"$FilePath`""
 
-            Write-Debug "Starting MSU installer:  $env:SystemRoot\System32\wusa.exe with Arguments: $msuArgs"
+            Write-Debug "Starting MSU installer:  $env:SystemRoot\System32\wusa.exe with Arguments: $msuArgs $LogArgs $SilentArgs"
             Write-Verbose "Installing .msu type: $filename..."
 
-            $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
+            $process = Start-Process -FilePath "$env:SystemRoot\System32\wusa.exe" -ArgumentList $msuArgs, $LogArgs, $SilentArgs -Wait -PassThru -RedirectStandardError $stdErrLog -RedirectStandardOutput $stdOutLog
             $process.ExitCode | Out-File -FilePath $exitCodeLog
             
             return $process.ExitCode 
